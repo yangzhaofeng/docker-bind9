@@ -11,5 +11,5 @@ It contains all the configs and will be mounted under /etc/bind/
 	--net=host \
 	--privileged \
 	-v /srv/docker/bind:/etc/bind \
-	yangzhaofengsteven/bind9
+	yangzhaofengsteven/bind9 -g
 
