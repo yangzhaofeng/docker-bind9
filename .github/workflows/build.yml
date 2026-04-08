@@ -8,7 +8,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
       - name: Set Docker image tag version
         id: image-name
         run: |
@@ -19,20 +19,29 @@ jobs:
               echo "Branch not recognized" >&2
               exit;;
           esac
-
           : ${TAG:=latest}
-          echo "::set-output name=tag::$TAG"
-          echo "::set-output name=name::yangzhaofengsteven/bind9:$TAG"
-      - name: Build Docker image
-        run: |
-          IMAGE="${{ steps.image-name.outputs.name }}"
-          docker pull "$IMAGE"
-          docker build --cache-from "$IMAGE" -t build-image .
-      - name: Push to Docker Hub
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "name=yangzhaofengsteven/bind9:$TAG" >> $GITHUB_OUTPUT
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Login to Docker Hub
         if: "github.repository == 'yangzhaofeng/docker-bind9'"
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_PASS }}
+      - name: Build multi-arch image
         run: |
           IMAGE="${{ steps.image-name.outputs.name }}"
-          docker tag build-image "$IMAGE"
-          docker login -u "${{ secrets.DOCKER_USER }}" -p "${{ secrets.DOCKER_PASS }}"
-          docker push "$IMAGE"
+          PUSH_FLAG="--load"
+          if [ "${{ github.repository }}" = "yangzhaofeng/docker-bind9" ]; then
+            PUSH_FLAG="--push"
+          fi
+          docker buildx build \
+            --platform linux/amd64,linux/arm64 \
+            -t "$IMAGE" \
+            $PU
+
 
