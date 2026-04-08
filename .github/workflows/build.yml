@@ -20,8 +20,8 @@ jobs:
               exit;;
           esac
           : ${TAG:=latest}
-          echo "::set-output name=tag::$TAG"
-          echo "::set-output name=name::yangzhaofengsteven/bind9:$TAG"
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+          echo "name=yangzhaofengsteven/bind9:$TAG" >> $GITHUB_OUTPUT
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx
@@ -39,9 +39,6 @@ jobs:
           if [ "${{ github.repository }}" = "yangzhaofeng/docker-bind9" ]; then
             PUSH_FLAG="--push"
           fi
-          docker buildx build \
-            --platform linux/amd64,linux/arm64 \
-            -t "$IMAGE" \
-            $PU
+          docker buildx build --platform linux/amd64,linux/arm64 -t "$IMAGE" .
 
 
