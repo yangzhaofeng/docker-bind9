@@ -39,6 +39,6 @@ jobs:
           if [ "${{ github.repository }}" = "yangzhaofeng/docker-bind9" ]; then
             PUSH_FLAG="--push"
           fi
-          docker buildx build --platform linux/amd64,linux/arm64/v8 -t "$IMAGE" .
+          docker buildx build --platform linux/amd64,linux/arm64 "$PUSH_FLAG" -t "$IMAGE" .
 
 
